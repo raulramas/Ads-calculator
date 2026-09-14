@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ads Feasibility & Revenue Simulator</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .calculator-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      max-width: 520px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .results {
+      margin-top: 24px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      display: none;
+    }
+
+    /* Highlights Grid */
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .highlight-card {
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .highlight-card.blue {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+    }
+
+    .highlight-card.green {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+
+    .highlight-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      color: #475569;
+    }
+
+    .highlight-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .highlight-card.blue .highlight-value {
+      color: var(--primary);
+    }
+
+    .highlight-card.green .highlight-value {
+      color: var(--success);
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+
+    .result-value {
+      font-weight: 700;
+    }
+
+    .status-box {
+      padding: 14px;
+      border-radius: 6px;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .status-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .status-green {
+      background-color: #dcfce7;
+      color: var(--success);
+      border: 1px solid #86efac;
+    }
+
+    .status-yellow {
+      background-color: #fef3c7;
+      color: var(--warning);
+      border: 1px solid #fde68a;
+    }
+
+    .status-red {
+      background-color: #fee2e2;
+      color: var(--danger);
+      border: 1px solid #fca5a5;
+    }
+
+    .improvements-header {
+      font-weight: 700;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    .improvements {
+      margin-top: 4px;
+      padding-left: 18px;
+    }
+
+    .improvements li {
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="calculator-card">
+  <h2>Paid Ads Feasibility & Revenue Simulator</h2>
+  
+  <div class="form-group">
+    <label for="monthlyPrice">Average Monthly Price ($)</label>
+    <input type="number" id="monthlyPrice" placeholder="e.g. 500" min="1">
+  </div>
+
+  <div class="form-group">
+    <label for="retentionMonths">Client Retention Period (Months)</label>
+    <input type="number" id="retentionMonths" placeholder="e.g. 6" min="1">
+  </div>
+
+  <div class="form-group">
+    <label for="targetClients">Target New Clients / Month</label>
+    <input type="number" id="targetClients" placeholder="e.g. 3" min="1">
+  </div>
+
+  <div class="form-group">
+    <label for="conversionRate">Lead-to-Client Conversion Rate (%)</label>
+    <select id="conversionRate">
+      <option value="0.02">2% (Bad / Low Performing Sales)</option>
+      <option value="0.05">5% (Below Average)</option>
+      <option value="0.10" selected>10% (Market Average)</option>
+      <option value="0.15">15% (High Performing)</option>
+      <option value="0.20">20% (GOAT / Top-Tier Sales)</option>
+    </select>
+  </div>
+
+  <button onclick="calculateSimulator()">Calculate Revenue Projection</button>
+
+  <div id="results" class="results">
+    
+    <!-- Visual Highlight Grid -->
+    <div class="highlights-grid">
+      <div class="highlight-card blue">
+        <div class="highlight-label">Est. Monthly Ad Budget</div>
+        <div class="highlight-value" id="resAdBudget">$0 - $0</div>
+      </div>
+      <div class="highlight-card green">
+        <div class="highlight-label" id="resProjectedLabel">Projected LTV Revenue</div>
+        <div class="highlight-value" id="resProjectedRevenue">$0</div>
+      </div>
+    </div>
+
+    <div class="result-item">
+      <span>New Monthly Recurring Revenue (MRR):</span>
+      <span class="result-value" id="resAddedMRR">+$0/mo</span>
+    </div>
+    <div class="result-item">
+      <span>Required Monthly Leads:</span>
+      <span class="result-value" id="resRequiredLeads">0 leads</span>
+    </div>
+    <div class="result-item">
+      <span>Estimated CAC Range ($15 - $50 CPL):</span>
+      <span class="result-value" id="resCAC">$0.00 - $0.00</span>
+    </div>
+    <div class="result-item">
+      <span>Estimated ROI (LTV:CAC Ratio):</span>
+      <span class="result-value" id="resROI">0.0x - 0.0x</span>
+    </div>
+
+    <div id="statusBox" class="status-box">
+      <div id="statusTitle" class="status-title"></div>
+      <div id="statusDesc"></div>
+      <div id="improvementsHeader" class="improvements-header" style="display:none;">Optimization Levers to Improve Ads Viability:</div>
+      <ul id="improvementList" class="improvements"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  function calculateSimulator() {
+    const monthlyPrice = parseFloat(document.getElementById('monthlyPrice').value);
+    const retentionMonths = parseInt(document.getElementById('retentionMonths').value);
+    const targetClients = parseInt(document.getElementById('targetClients').value);
+    const conversionRate = parseFloat(document.getElementById('conversionRate').value);
+
+    if (!monthlyPrice || !retentionMonths || !targetClients || monthlyPrice <= 0 || retentionMonths <= 0 || targetClients <= 0) {
+      alert("Please fill in all fields with valid numbers.");
+      return;
+    }
+
+    // Calculations
+    const addedMRR = monthlyPrice * targetClients;
+    const projectedLTVRevenue = addedMRR * retentionMonths;
+    const ltvPerClient = monthlyPrice * retentionMonths;
+
+    const requiredLeads = Math.ceil(targetClients / conversionRate);
+
+    const minAdBudget = requiredLeads * 15;
+    const maxAdBudget = requiredLeads * 50;
+
+    const bestCAC = 15 / conversionRate;
+    const worstCAC = 50 / conversionRate;
+
+    const bestROI = ltvPerClient / bestCAC;
+    const worstROI = ltvPerClient / worstCAC;
+
+    // UI Outputs
+    document.getElementById('resAdBudget').innerText = `${minAdBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} - ${maxAdBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}`;
+    document.getElementById('resProjectedLabel').innerText = `Projected (${retentionMonths} Mo. Revenue)`;
+    document.getElementById('resProjectedRevenue').innerText = projectedLTVRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    
+    document.getElementById('resAddedMRR').innerText = `+${addedMRR.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}/mo`;
+    document.getElementById('resRequiredLeads').innerText = `${requiredLeads} leads/mo`;
+    document.getElementById('resCAC').innerText = `${bestCAC.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} - ${worstCAC.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`;
+    document.getElementById('resROI').innerText = `${worstROI.toFixed(1)}x - ${bestROI.toFixed(1)}x`;
+
+    const statusBox = document.getElementById('statusBox');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusDesc = document.getElementById('statusDesc');
+    const improvementList = document.getElementById('improvementList');
+    const improvementsHeader = document.getElementById('improvementsHeader');
+
+    improvementList.innerHTML = '';
+    let points = [];
+
+    // Diagnostic Levers
+    if (monthlyPrice < 500) {
+      points.push("<strong>Pricing Strategy:</strong> Raising fees or bundling high-value services increases LTV, allowing higher CAC tolerance.");
+    }
+    if (retentionMonths < 6) {
+      points.push("<strong>Client Retention (LTV):</strong> Extending retention via better onboarding increases total revenue per acquired client.");
+    }
+    if (conversionRate < 0.10) {
+      points.push("<strong>Sales Conversion Rate:</strong> Closing below 10% requires generating high lead volumes, increasing budget demands.");
+    }
+
+    // Diagnostics Logic
+    if (worstROI >= 3) {
+      statusBox.className = "status-box status-green";
+      statusTitle.innerText = "READY FOR ADS (High Feasibility)";
+      statusDesc.innerText = "Your unit economics easily support paid ads even at $50/lead. Investing the recommended budget is highly viable.";
+      improvementsHeader.style.display = "none";
+    } else if (bestROI >= 3 && worstROI < 3) {
+      statusBox.className = "status-box status-yellow";
+      statusTitle.innerText = "MODERATE RISK (Conditional Feasibility)";
+      statusDesc.innerText = "Feasible if leads stay closer to $15/lead. If CPL increases toward $50, profit margins will drop. Adjust these bottlenecks:";
+      improvementsHeader.style.display = "block";
+    } else {
+      statusBox.className = "status-box status-red";
+      statusTitle.innerText = "NOT RECOMMENDED FOR ADS (High Risk)";
+      statusDesc.innerText = "Current metrics show high financial risk for running ads. Fix the following areas before committing capital to paid media:";
+      improvementsHeader.style.display = "block";
+    }
+
+    if (points.length > 0 && worstROI < 3) {
+      points.forEach(pt => {
+        const li = document.createElement('li');
+        li.innerHTML = pt;
+        improvementList.appendChild(li);
+      });
+    }
+
+    document.getElementById('results').style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
