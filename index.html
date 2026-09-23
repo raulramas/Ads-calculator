@@ -86,7 +86,6 @@
       display: none;
     }
 
-    /* Highlights Grid */
     .highlights-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -136,10 +135,12 @@
       justify-content: space-between;
       margin-bottom: 10px;
       font-size: 0.95rem;
+      gap: 12px;
     }
 
     .result-value {
       font-weight: 700;
+      text-align: right;
     }
 
     .status-box {
@@ -195,7 +196,7 @@
 
 <div class="calculator-card">
   <h2>Paid Ads Feasibility & Revenue Simulator</h2>
-  
+
   <div class="form-group">
     <label for="monthlyPrice">Average Monthly Price ($)</label>
     <input type="number" id="monthlyPrice" placeholder="e.g. 500" min="1">
@@ -225,15 +226,17 @@
   <button onclick="calculateSimulator()">Calculate Revenue Projection</button>
 
   <div id="results" class="results">
-    
-    <!-- Visual Highlight Grid -->
+
     <div class="highlights-grid">
       <div class="highlight-card blue">
         <div class="highlight-label">Est. Monthly Ad Budget</div>
         <div class="highlight-value" id="resAdBudget">$0 - $0</div>
       </div>
+
       <div class="highlight-card green">
-        <div class="highlight-label" id="resProjectedLabel">Projected LTV Revenue</div>
+        <div class="highlight-label" id="resProjectedLabel">
+          Projected Lifetime Revenue
+        </div>
         <div class="highlight-value" id="resProjectedRevenue">$0</div>
       </div>
     </div>
@@ -242,23 +245,29 @@
       <span>New Monthly Recurring Revenue (MRR):</span>
       <span class="result-value" id="resAddedMRR">+$0/mo</span>
     </div>
+
     <div class="result-item">
       <span>Required Monthly Leads:</span>
       <span class="result-value" id="resRequiredLeads">0 leads</span>
     </div>
+
     <div class="result-item">
-      <span>Estimated CAC Range ($15 - $50 CPL):</span>
-      <span class="result-value" id="resCAC">$0.00 - $0.00</span>
-    </div>
-    <div class="result-item">
-      <span>Estimated ROI (LTV:CAC Ratio):</span>
-      <span class="result-value" id="resROI">0.0x - 0.0x</span>
+      <span>Estimated Lifetime ROAS(Return on Ad Spend):</span>
+      <span class="result-value" id="resROAS">0.0x - 0.0x</span>
     </div>
 
     <div id="statusBox" class="status-box">
       <div id="statusTitle" class="status-title"></div>
       <div id="statusDesc"></div>
-      <div id="improvementsHeader" class="improvements-header" style="display:none;">Optimization Levers to Improve Ads Viability:</div>
+
+      <div
+        id="improvementsHeader"
+        class="improvements-header"
+        style="display:none;"
+      >
+        Optimization Levers to Improve Ads Viability:
+      </div>
+
       <ul id="improvementList" class="improvements"></ul>
     </div>
   </div>
@@ -266,89 +275,210 @@
 
 <script>
   function calculateSimulator() {
-    const monthlyPrice = parseFloat(document.getElementById('monthlyPrice').value);
-    const retentionMonths = parseInt(document.getElementById('retentionMonths').value);
-    const targetClients = parseInt(document.getElementById('targetClients').value);
-    const conversionRate = parseFloat(document.getElementById('conversionRate').value);
+    const monthlyPrice = parseFloat(
+      document.getElementById('monthlyPrice').value
+    );
 
-    if (!monthlyPrice || !retentionMonths || !targetClients || monthlyPrice <= 0 || retentionMonths <= 0 || targetClients <= 0) {
+    const retentionMonths = parseInt(
+      document.getElementById('retentionMonths').value
+    );
+
+    const targetClients = parseInt(
+      document.getElementById('targetClients').value
+    );
+
+    const conversionRate = parseFloat(
+      document.getElementById('conversionRate').value
+    );
+
+    if (
+      !monthlyPrice ||
+      !retentionMonths ||
+      !targetClients ||
+      monthlyPrice <= 0 ||
+      retentionMonths <= 0 ||
+      targetClients <= 0
+    ) {
       alert("Please fill in all fields with valid numbers.");
       return;
     }
 
-    // Calculations
-    const addedMRR = monthlyPrice * targetClients;
-    const projectedLTVRevenue = addedMRR * retentionMonths;
-    const ltvPerClient = monthlyPrice * retentionMonths;
+    /*
+      CORE ECONOMICS
 
-    const requiredLeads = Math.ceil(targetClients / conversionRate);
+      Monthly recurring revenue:
+      Monthly price × new clients
 
-    const minAdBudget = requiredLeads * 15;
-    const maxAdBudget = requiredLeads * 50;
+      Projected lifetime revenue:
+      Monthly recurring revenue × expected retention period
 
-    const bestCAC = 15 / conversionRate;
-    const worstCAC = 50 / conversionRate;
+      Required leads:
+      Target clients ÷ lead-to-client conversion rate
 
-    const bestROI = ltvPerClient / bestCAC;
-    const worstROI = ltvPerClient / worstCAC;
+      Estimated ad budget:
+      Required leads × estimated CPL
+
+      Lifetime ROAS:
+      Projected lifetime revenue ÷ estimated ad spend
+    */
+
+    const addedMRR =
+      monthlyPrice * targetClients;
+
+    const projectedLifetimeRevenue =
+      addedMRR * retentionMonths;
+
+    const requiredLeads =
+      Math.ceil(targetClients / conversionRate);
+
+    const minAdBudget =
+      requiredLeads * 15;
+
+    const maxAdBudget =
+      requiredLeads * 50;
+
+    /*
+      Lifetime ROAS represents the projected lifetime
+      revenue generated by acquired clients compared
+      with the total ad spend required to acquire them.
+    */
+
+    const bestROAS =
+      projectedLifetimeRevenue / minAdBudget;
+
+    const worstROAS =
+      projectedLifetimeRevenue / maxAdBudget;
 
     // UI Outputs
-    document.getElementById('resAdBudget').innerText = `${minAdBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} - ${maxAdBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}`;
-    document.getElementById('resProjectedLabel').innerText = `Projected (${retentionMonths} Mo. Revenue)`;
-    document.getElementById('resProjectedRevenue').innerText = projectedLTVRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-    
-    document.getElementById('resAddedMRR').innerText = `+${addedMRR.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}/mo`;
-    document.getElementById('resRequiredLeads').innerText = `${requiredLeads} leads/mo`;
-    document.getElementById('resCAC').innerText = `${bestCAC.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} - ${worstCAC.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`;
-    document.getElementById('resROI').innerText = `${worstROI.toFixed(1)}x - ${bestROI.toFixed(1)}x`;
 
-    const statusBox = document.getElementById('statusBox');
-    const statusTitle = document.getElementById('statusTitle');
-    const statusDesc = document.getElementById('statusDesc');
-    const improvementList = document.getElementById('improvementList');
-    const improvementsHeader = document.getElementById('improvementsHeader');
+    document.getElementById('resAdBudget').innerText =
+      `${minAdBudget.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      })} - ${maxAdBudget.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      })}`;
+
+    document.getElementById('resProjectedLabel').innerText =
+      `Projected ${retentionMonths}-Month Revenue`;
+
+    document.getElementById('resProjectedRevenue').innerText =
+      projectedLifetimeRevenue.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      });
+
+    document.getElementById('resAddedMRR').innerText =
+      `+${addedMRR.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      })}/mo`;
+
+    document.getElementById('resRequiredLeads').innerText =
+      `${requiredLeads} leads/mo`;
+
+    document.getElementById('resROAS').innerText =
+      `${worstROAS.toFixed(1)}x - ${bestROAS.toFixed(1)}x`;
+
+    const statusBox =
+      document.getElementById('statusBox');
+
+    const statusTitle =
+      document.getElementById('statusTitle');
+
+    const statusDesc =
+      document.getElementById('statusDesc');
+
+    const improvementList =
+      document.getElementById('improvementList');
+
+    const improvementsHeader =
+      document.getElementById('improvementsHeader');
 
     improvementList.innerHTML = '';
+
     let points = [];
 
     // Diagnostic Levers
+
     if (monthlyPrice < 500) {
-      points.push("<strong>Pricing Strategy:</strong> Raising fees or bundling high-value services increases LTV, allowing higher CAC tolerance.");
+      points.push(
+        "<strong>Pricing Strategy:</strong> Raising fees or bundling high-value services increases lifetime revenue, allowing higher ad spend per acquired client."
+      );
     }
+
     if (retentionMonths < 6) {
-      points.push("<strong>Client Retention (LTV):</strong> Extending retention via better onboarding increases total revenue per acquired client.");
+      points.push(
+        "<strong>Client Retention:</strong> Extending retention increases projected lifetime revenue per acquired client, improving the economics of paid acquisition."
+      );
     }
+
     if (conversionRate < 0.10) {
-      points.push("<strong>Sales Conversion Rate:</strong> Closing below 10% requires generating high lead volumes, increasing budget demands.");
+      points.push(
+        "<strong>Sales Conversion Rate:</strong> A lower lead-to-client conversion rate requires generating more leads to acquire the same number of clients, increasing the required ad budget."
+      );
     }
 
     // Diagnostics Logic
-    if (worstROI >= 3) {
-      statusBox.className = "status-box status-green";
-      statusTitle.innerText = "READY FOR ADS (High Feasibility)";
-      statusDesc.innerText = "Your unit economics easily support paid ads even at $50/lead. Investing the recommended budget is highly viable.";
-      improvementsHeader.style.display = "none";
-    } else if (bestROI >= 3 && worstROI < 3) {
-      statusBox.className = "status-box status-yellow";
-      statusTitle.innerText = "MODERATE RISK (Conditional Feasibility)";
-      statusDesc.innerText = "Feasible if leads stay closer to $15/lead. If CPL increases toward $50, profit margins will drop. Adjust these bottlenecks:";
-      improvementsHeader.style.display = "block";
+
+    if (worstROAS >= 3) {
+      statusBox.className =
+        "status-box status-green";
+
+      statusTitle.innerText =
+        "READY FOR ADS (High Feasibility)";
+
+      statusDesc.innerText =
+        "Your projected lifetime revenue supports paid ads even at $50/lead based on the assumptions provided.";
+
+      improvementsHeader.style.display =
+        "none";
+
+    } else if (bestROAS >= 3 && worstROAS < 3) {
+      statusBox.className =
+        "status-box status-yellow";
+
+      statusTitle.innerText =
+        "MODERATE RISK (Conditional Feasibility)";
+
+      statusDesc.innerText =
+        "The model is viable if leads stay closer to $15/lead. If CPL increases toward $50, projected lifetime ROAS decreases. Adjust these bottlenecks:";
+
+      improvementsHeader.style.display =
+        "block";
+
     } else {
-      statusBox.className = "status-box status-red";
-      statusTitle.innerText = "NOT RECOMMENDED FOR ADS (High Risk)";
-      statusDesc.innerText = "Current metrics show high financial risk for running ads. Fix the following areas before committing capital to paid media:";
-      improvementsHeader.style.display = "block";
+      statusBox.className =
+        "status-box status-red";
+
+      statusTitle.innerText =
+        "NOT RECOMMENDED FOR ADS (High Risk)";
+
+      statusDesc.innerText =
+        "Current assumptions produce a low projected lifetime return relative to estimated ad spend. Consider improving the following areas before committing capital to paid media:";
+
+      improvementsHeader.style.display =
+        "block";
     }
 
-    if (points.length > 0 && worstROI < 3) {
+    if (points.length > 0 && worstROAS < 3) {
       points.forEach(pt => {
-        const li = document.createElement('li');
+        const li =
+          document.createElement('li');
+
         li.innerHTML = pt;
+
         improvementList.appendChild(li);
       });
     }
 
-    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').style.display =
+      'block';
   }
 </script>
 
